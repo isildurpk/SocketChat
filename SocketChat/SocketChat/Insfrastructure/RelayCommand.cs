@@ -20,6 +20,12 @@ namespace SocketChat.Insfrastructure
             _canExecute = canExecute;
         }
 
+        public RelayCommand(Action execute, Func<bool> canExecute)
+        {
+            _execute = obj => execute();
+            _canExecute = obj => canExecute();
+        }
+
         #endregion
 
         #region Implementation of ICommand

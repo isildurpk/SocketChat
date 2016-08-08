@@ -1,4 +1,5 @@
 ﻿using System.Windows.Input;
+using SocketChat.Insfrastructure;
 
 namespace SocketChat.ViewModels
 {
@@ -8,14 +9,33 @@ namespace SocketChat.ViewModels
 
         public MainVm()
         {
-            
+            SendCommand = new RelayCommand(Send, CanSend);
+        }
+
+        #endregion
+
+        #region Commands
+
+        public ICommand SendCommand { get; private set; }
+
+        private void Send()
+        {
+        }
+
+        private bool CanSend()
+        {
+            return !string.IsNullOrEmpty(Input);
         }
 
         #endregion
 
         #region Properties
 
-        public ICommand SendCommand { get; private set; }
+        public string Input { get; set; }
+
+        #endregion
+
+        #region Methods
 
         #endregion
     }
