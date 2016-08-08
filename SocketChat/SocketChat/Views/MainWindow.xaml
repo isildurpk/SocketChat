@@ -3,10 +3,14 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:SocketChat.ViewModels"
         mc:Ignorable="d"
-        Title="MainWindow" Height="800" Width="600">
-
-    <Grid>
+        Title="Isildur | Socket Chat" Height="600" Width="800">
+    <Window.Resources>
+        <viewModels:MainVm x:Key="MainVm" />
+    </Window.Resources>
+    
+    <Grid DataContext="{StaticResource MainVm}">
         <Grid.RowDefinitions>
             <RowDefinition />
             <RowDefinition Height="Auto" />
@@ -16,7 +20,7 @@
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
-        <TextBox Grid.Row="0" Grid.Column="1" />
+        <TextBox Grid.Row="0" Grid.Column="1" Margin="3" IsReadOnly="True" Padding="8" />
 
         <Grid Grid.Row="1" Grid.Column="1">
             <Grid.ColumnDefinitions>
@@ -24,8 +28,8 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <TextBox Grid.Column="0" />
-            <Button Grid.Column="1" Content="Send" />
+            <TextBox Grid.Column="0" Margin="3" VerticalContentAlignment="Center" />
+            <Button Grid.Column="1" Content="Send" Padding="8 3" Margin="3" />
         </Grid>
     </Grid>
 </Window>
