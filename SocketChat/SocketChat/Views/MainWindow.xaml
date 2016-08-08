@@ -29,7 +29,7 @@
             </Grid.ColumnDefinitions>
 
             <TextBox Grid.Column="0" Margin="3" VerticalContentAlignment="Center"
-                     Text="{Binding Input, Mode=TwoWay}" />
+                     Text="{Binding Input, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             <Button Grid.Column="1" Content="Send" Padding="8 3" Margin="3"
                     Command="{Binding SendCommand}" />
         </Grid>

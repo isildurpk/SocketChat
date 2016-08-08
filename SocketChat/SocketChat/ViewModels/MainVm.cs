@@ -3,7 +3,7 @@ using SocketChat.Insfrastructure;
 
 namespace SocketChat.ViewModels
 {
-    public class MainVm
+    public class MainVm : NotifyPropertyChangedBase
     {
         #region Constructors
 
