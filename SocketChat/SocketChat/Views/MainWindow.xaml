@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:SocketChat.ViewModels"
         mc:Ignorable="d"
-        Title="Isildur | Socket Chat" Height="600" Width="800">
+        Title="Isildur | Socket Chat"
+        Height="600" Width="800" MinHeight="300" MinWidth="500">
     <Window.Resources>
         <viewModels:MainVm x:Key="MainVm" />
     </Window.Resources>
@@ -20,7 +21,8 @@
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
-        <TextBox Grid.Row="0" Grid.Column="1" Margin="3" IsReadOnly="True" Padding="8" />
+        <TextBox Grid.Row="0" Grid.Column="1" Margin="3" IsReadOnly="True" Padding="8"
+                 Text="{Binding Output, Mode=OneWay}" />
 
         <Grid Grid.Row="1" Grid.Column="1">
             <Grid.ColumnDefinitions>

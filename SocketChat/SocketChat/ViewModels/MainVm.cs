@@ -1,10 +1,14 @@
-﻿using System.Windows.Input;
+﻿using System;
+using System.Text;
+using System.Windows.Input;
 using SocketChat.Insfrastructure;
 
 namespace SocketChat.ViewModels
 {
     public class MainVm : NotifyPropertyChangedBase
     {
+        private readonly StringBuilder _outputSb = new StringBuilder();
+
         #region Constructors
 
         public MainVm()
@@ -20,6 +24,12 @@ namespace SocketChat.ViewModels
 
         private void Send()
         {
+            _outputSb.AppendFormat("{0:t} Me: {1}{2}", DateTime.Now, Input, Environment.NewLine);
+            Output = _outputSb.ToString();
+            Input = string.Empty;
+
+            OnPropertyChanged(nameof(Output));
+            OnPropertyChanged(nameof(Input));
         }
 
         private bool CanSend()
@@ -32,6 +42,8 @@ namespace SocketChat.ViewModels
         #region Properties
 
         public string Input { get; set; }
+
+        public string Output { get; private set; }
 
         #endregion
 
