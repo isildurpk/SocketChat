@@ -7,12 +7,17 @@ namespace SocketChat.ViewModels
 {
     public class MainVm : NotifyPropertyChangedBase
     {
+        #region Fields
+
         private readonly StringBuilder _outputSb = new StringBuilder();
+
+        #endregion
 
         #region Constructors
 
         public MainVm()
         {
+            ConnectCommand = new RelayCommand(Connect, CanConnect);
             SendCommand = new RelayCommand(Send, CanSend);
         }
 
@@ -20,11 +25,23 @@ namespace SocketChat.ViewModels
 
         #region Commands
 
+        public ICommand ConnectCommand { get; private set; }
+
+        private void Connect()
+        {
+            
+        }
+
+        private bool CanConnect()
+        {
+            return !string.IsNullOrEmpty(ServerIp) && ServerPort > 0;
+        }
+
         public ICommand SendCommand { get; private set; }
 
         private void Send()
         {
-            _outputSb.AppendFormat("{0:t} Me: {1}{2}", DateTime.Now, Input, Environment.NewLine);
+            _outputSb.AppendLine($"{DateTime.Now:t} Me: {Input}");
             Output = _outputSb.ToString();
             Input = string.Empty;
 
@@ -44,6 +61,10 @@ namespace SocketChat.ViewModels
         public string Input { get; set; }
 
         public string Output { get; private set; }
+
+        public string ServerIp { get; set; }
+
+        public ushort? ServerPort { get; set; }
 
         #endregion
 

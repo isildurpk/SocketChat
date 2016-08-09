@@ -9,6 +9,13 @@
         Height="600" Width="800" MinHeight="300" MinWidth="500">
     <Window.Resources>
         <viewModels:MainVm x:Key="MainVm" />
+        <Style TargetType="TextBox">
+            <Setter Property="Margin" Value="3" />
+        </Style>
+
+        <Style TargetType="TextBlock">
+            <Setter Property="Margin" Value="3" />
+        </Style>
     </Window.Resources>
 
     <Grid DataContext="{StaticResource MainVm}">
@@ -21,7 +28,28 @@
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
-        <TextBox Grid.Row="0" Grid.Column="1" Margin="3" IsReadOnly="True" Padding="8"
+        <Grid Grid.Row="0" Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Text="Server IP:" />
+            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ServerIp, Mode=TwoWay}" />
+
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="Server port:" />
+            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding ServerPort, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+            <Button Grid.Row="2" Grid.Column="1" Content="Connect" Margin="3" Width="80" HorizontalAlignment="Right"
+                    Command="{Binding ConnectCommand}" />
+        </Grid>
+
+        <TextBox Grid.Row="0" Grid.Column="1" IsReadOnly="True" Padding="8"
                  Text="{Binding Output, Mode=OneWay}" />
 
         <Grid Grid.Row="1" Grid.Column="1">
@@ -30,7 +58,7 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <TextBox Grid.Column="0" Margin="3" VerticalContentAlignment="Center"
+            <TextBox Grid.Column="0"
                      Text="{Binding Input, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             <Button Grid.Column="1" Content="Send" Padding="8 3" Margin="3"
                     Command="{Binding SendCommand}" />
