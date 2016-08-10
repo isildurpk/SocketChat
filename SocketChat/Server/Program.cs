@@ -9,9 +9,9 @@ namespace Server
             var server = new ServerObject();
             server.Start(55555);
 
-            do
+            while (Console.ReadKey().Key != ConsoleKey.Escape)
             {
-            } while (Console.ReadKey().Key != ConsoleKey.Escape);
+            }
 
             server.Stop();
             Console.Write("Press any key...");

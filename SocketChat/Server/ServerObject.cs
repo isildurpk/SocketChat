@@ -55,9 +55,15 @@ namespace Server
 
             while (IsListenning)
             {
-                var client = await _tcpListener.AcceptTcpClientAsync();
-                _clients.Add(new ClientObject(client));
-                Console.WriteLine("New client connected");
+                try
+                {
+                    var client = await _tcpListener.AcceptTcpClientAsync();
+                    _clients.Add(new ClientObject(client));
+                    Console.WriteLine("New client connected");
+                }
+                catch (ObjectDisposedException)
+                {
+                }
             }
         }
 
