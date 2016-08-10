@@ -1,9 +1,21 @@
-﻿namespace Server
+﻿using System;
+
+namespace Server
 {
-    internal static class Program
+    public static class Program
     {
-        private static void Main(string[] args)
+        public static void Main(string[] args)
         {
+            var server = new ServerObject();
+            server.Start(55555);
+
+            do
+            {
+            } while (Console.ReadKey().Key != ConsoleKey.Escape);
+
+            server.Stop();
+            Console.Write("Press any key...");
+            Console.ReadKey(true);
         }
     }
 }

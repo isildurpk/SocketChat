@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
-using Server.Interfaces;
+using System.Threading;
 
 namespace Server
 {
-    internal class ServerObject : IServer
+    internal class ServerObject
     {
         #region Fields
 
@@ -14,27 +15,51 @@ namespace Server
 
         #endregion
 
-        #region Constructors
-
-        public ServerObject(IPEndPoint localIpEndPoint)
-        {
-            LocalIpEndPoint = localIpEndPoint;
-        }
-
-        #endregion
-        
         #region Implementation of IServer
 
-        public IPEndPoint LocalIpEndPoint { get; }
+        public bool IsListenning { get; private set; }
 
-        public void Start()
+        public ushort Port { get; private set; }
+
+        public void Start(ushort port)
         {
-            _tcpListener = new TcpListener(LocalIpEndPoint);
+            Port = port;
+
+            _tcpListener = new TcpListener(new IPEndPoint(IPAddress.Any, Port));
+            _tcpListener.Start();
+            Console.WriteLine($"Server has been started on port {Port}");
+
+            ThreadPool.QueueUserWorkItem(state => Listen());
+        }
+
+        public void Stop()
+        {
+            Console.WriteLine("Stopping the server");
+            _tcpListener.Stop();
+            IsListenning = false;
+
+            foreach (var client in _clients)
+            {
+                client.Dispose();
+            }
         }
 
         #endregion
 
         #region Methods
+
+        private async void Listen()
+        {
+            Console.WriteLine("Waiting for connections...");
+            IsListenning = true;
+
+            while (IsListenning)
+            {
+                var client = await _tcpListener.AcceptTcpClientAsync();
+                _clients.Add(new ClientObject(client));
+                Console.WriteLine("New client connected");
+            }
+        }
 
         #endregion
     }
