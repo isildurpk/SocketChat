@@ -25,6 +25,7 @@ namespace SocketChat.ViewModels
         public MainVm()
         {
             ConnectCommand = new RelayCommand(Connect, CanConnect);
+            DisconnectCommand = new RelayCommand(Disconnect, CanDisconnect);
             SendCommand = new RelayCommand(Send, CanSend);
         }
 
@@ -49,7 +50,20 @@ namespace SocketChat.ViewModels
 
         private bool CanConnect()
         {
-            return !string.IsNullOrEmpty(ServerIp) && ServerPort > 0;
+            return !IsConnected && !string.IsNullOrEmpty(ServerIp) && ServerPort > 0;
+        }
+
+        public ICommand DisconnectCommand { get; private set; }
+
+        private void Disconnect()
+        {
+            _tcpClient.Close();
+            IsConnected = false;
+        }
+
+        private bool CanDisconnect()
+        {
+            return IsConnected;
         }
 
         public ICommand SendCommand { get; private set; }
