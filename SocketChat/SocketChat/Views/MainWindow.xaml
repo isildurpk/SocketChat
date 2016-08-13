@@ -43,9 +43,15 @@
             <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ServerIp, Mode=TwoWay}" />
 
             <TextBlock Grid.Row="1" Grid.Column="0" Text="Server port:" />
-            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding ServerPort, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox Grid.Row="1" Grid.Column="1"
+                     Text="{Binding ServerPort, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
             <Button Grid.Row="2" Grid.Column="1" Content="Connect" Margin="3" Width="80" HorizontalAlignment="Right"
+                    Visibility="{Binding IsConnected, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter='Inverse'}"
+                    Command="{Binding ConnectCommand}" />
+
+            <Button Grid.Row="2" Grid.Column="1" Content="Disconnect" Margin="3" Width="80" HorizontalAlignment="Right"
+                    Visibility="{Binding IsConnected, Converter={StaticResource BooleanToVisibilityConverter}}"
                     Command="{Binding ConnectCommand}" />
         </Grid>
 

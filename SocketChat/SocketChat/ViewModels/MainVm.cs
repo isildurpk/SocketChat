@@ -43,6 +43,8 @@ namespace SocketChat.ViewModels
 
             var ip = IPAddress.Parse(ServerIp);
             await _tcpClient.ConnectAsync(ip, ServerPort.Value);
+
+            IsConnected = true;
         }
 
         private bool CanConnect()
@@ -70,6 +72,8 @@ namespace SocketChat.ViewModels
         #endregion
 
         #region Properties
+
+        public bool IsConnected { get; set; }
 
         public string Input { get; set; }
 
