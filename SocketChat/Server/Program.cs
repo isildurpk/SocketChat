@@ -7,7 +7,7 @@ namespace Server
         public static void Main(string[] args)
         {
             var server = new ServerObject();
-            server.Start(55555);
+            server.Start(56000);
 
             while (Console.ReadKey().Key != ConsoleKey.Escape)
             {

@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Windows.Input;
 using SocketChat.Insfrastructure;
@@ -9,7 +12,11 @@ namespace SocketChat.ViewModels
     {
         #region Fields
 
+        private const ushort LocalPortFrom = 55000;
+        private const ushort LocalPortTo = 55999;
+
         private readonly StringBuilder _outputSb = new StringBuilder();
+        private TcpClient _tcpClient;
 
         #endregion
 
@@ -27,9 +34,15 @@ namespace SocketChat.ViewModels
 
         public ICommand ConnectCommand { get; private set; }
 
-        private void Connect()
+        [SuppressMessage("ReSharper", "PossibleInvalidOperationException")]
+        private async void Connect()
         {
-            
+            var random = new Random();
+            var localIep = new IPEndPoint(IPAddress.Loopback, random.Next(LocalPortFrom, LocalPortTo));
+            _tcpClient = new TcpClient(localIep);
+
+            var ip = IPAddress.Parse(ServerIp);
+            await _tcpClient.ConnectAsync(ip, ServerPort.Value);
         }
 
         private bool CanConnect()
@@ -62,9 +75,9 @@ namespace SocketChat.ViewModels
 
         public string Output { get; private set; }
 
-        public string ServerIp { get; set; }
+        public string ServerIp { get; set; } = "127.0.0.1";
 
-        public ushort? ServerPort { get; set; }
+        public ushort? ServerPort { get; set; } = 56000;
 
         #endregion
 
