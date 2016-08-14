@@ -9,6 +9,7 @@ namespace Server
     {
         #region Fields
 
+        private readonly ServerObject _server;
         private readonly TcpClient _tcpClient;
         private readonly NetworkStream _stream;
 
@@ -16,10 +17,11 @@ namespace Server
 
         #region Constructors
 
-        public ClientObject(TcpClient tcpClient)
+        public ClientObject(TcpClient tcpClient, ServerObject server)
         {
             _tcpClient = tcpClient;
             _stream = tcpClient.GetStream();
+            _server = server;
         }
 
         #endregion
@@ -36,10 +38,22 @@ namespace Server
 
         #region Methods
 
+        public async void Send(string message)
+        {
+            var bytes = Encoding.UTF8.GetBytes(message);
+            await _stream.WriteAsync(bytes, 0, bytes.Length);
+        }
+
         public async void Start()
         {
             var nickname = await GetMessageAsync();
-            Console.WriteLine($"{nickname} connected to chat");
+            _server.BroadcastMessage($"{nickname} connected to chat", this);
+
+            while (true)
+            {
+                var message = await GetMessageAsync();
+                _server.BroadcastMessage(message, this);
+            }
         }
 
         private async Task<string> GetMessageAsync()

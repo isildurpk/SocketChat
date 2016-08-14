@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 
 namespace Server
@@ -48,6 +50,15 @@ namespace Server
 
         #region Methods
 
+        public void BroadcastMessage(string message, ClientObject exceptClient)
+        {
+            Console.WriteLine(message);
+            foreach (var client in _clients.Where(x => x != exceptClient))
+            {
+                client.Send(message);
+            }
+        }
+
         private async void Listen()
         {
             Console.WriteLine("Waiting for connections...");
@@ -58,7 +69,7 @@ namespace Server
                 try
                 {
                     var tcpClient = await _tcpListener.AcceptTcpClientAsync();
-                    var client = new ClientObject(tcpClient);
+                    var client = new ClientObject(tcpClient, this);
                     _clients.Add(client);
                     ThreadPool.QueueUserWorkItem(state => client.Start());
                 }

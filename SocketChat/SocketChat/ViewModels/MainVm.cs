@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Windows.Input;
 using SocketChat.Insfrastructure;
 
@@ -52,6 +53,8 @@ namespace SocketChat.ViewModels
 
             IsConnected = true;
             OnPropertyChanged(nameof(IsConnected));
+
+            ThreadPool.QueueUserWorkItem(state => ReceiveMessages());
         }
 
         private bool CanConnect()
@@ -77,7 +80,7 @@ namespace SocketChat.ViewModels
 
         private async void Send()
         {
-            var bytes = Encoding.UTF8.GetBytes("Isildur");
+            var bytes = Encoding.UTF8.GetBytes(Input);
             await _stream.WriteAsync(bytes, 0, bytes.Length);
 
             _outputSb.AppendLine($"{DateTime.Now:t} Me: {Input}");
@@ -110,6 +113,26 @@ namespace SocketChat.ViewModels
         #endregion
 
         #region Methods
+
+        private async void ReceiveMessages()
+        {
+            var sb = new StringBuilder();
+            var bytes = new byte[128];
+
+            while (IsConnected)
+            {
+                do
+                {
+                    var count = await _stream.ReadAsync(bytes, 0, bytes.Length);
+                    sb.Append(Encoding.UTF8.GetString(bytes, 0, count));
+                } while (_stream.DataAvailable);
+
+                _outputSb.AppendLine(sb.ToString());
+                sb.Clear();
+                Output = _outputSb.ToString();
+                OnPropertyChanged(nameof(Output));
+            }
+        }
 
         #endregion
     }
