@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
@@ -55,7 +56,7 @@ namespace Server
                 var message = await GetMessageAsync();
                 if (string.IsNullOrEmpty(message))
                 {
-                    _server.BroadcastMessage($"{_nickname} leaves the chat");
+                    _server.BroadcastMessage($"{_nickname} leaves the chat", this);
                     break;
                 }
 
@@ -67,12 +68,20 @@ namespace Server
         {
             var sb = new StringBuilder();
 
-            var bytes = new byte[128];
-            do
+            try
             {
-                var count = await _stream.ReadAsync(bytes, 0, bytes.Length);
-                sb.Append(Encoding.UTF8.GetString(bytes, 0, count));
-            } while (_stream.DataAvailable);
+                var bytes = new byte[128];
+                do
+                {
+                    var count = await _stream.ReadAsync(bytes, 0, bytes.Length);
+                    sb.Append(Encoding.UTF8.GetString(bytes, 0, count));
+                } while (_stream.DataAvailable);
+            }
+            catch (IOException)
+            {
+                // Клиент принудительно закрыли
+                return null;
+            }
 
             return sb.ToString();
         }

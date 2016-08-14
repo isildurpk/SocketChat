@@ -115,7 +115,7 @@ namespace SocketChat.ViewModels
 
         private bool CanSend()
         {
-            return !string.IsNullOrEmpty(Input);
+            return !string.IsNullOrEmpty(Input) && IsConnected;
         }
 
         #endregion
