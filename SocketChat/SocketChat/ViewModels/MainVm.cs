@@ -17,6 +17,7 @@ namespace SocketChat.ViewModels
 
         private readonly StringBuilder _outputSb = new StringBuilder();
         private TcpClient _tcpClient;
+        private NetworkStream _stream;
 
         #endregion
 
@@ -44,8 +45,10 @@ namespace SocketChat.ViewModels
 
             var ip = IPAddress.Parse(ServerIp);
             await _tcpClient.ConnectAsync(ip, ServerPort.Value);
+            _stream = _tcpClient.GetStream();
 
             IsConnected = true;
+            OnPropertyChanged(nameof(IsConnected));
         }
 
         private bool CanConnect()
@@ -59,6 +62,7 @@ namespace SocketChat.ViewModels
         {
             _tcpClient.Close();
             IsConnected = false;
+            OnPropertyChanged(nameof(IsConnected));
         }
 
         private bool CanDisconnect()
