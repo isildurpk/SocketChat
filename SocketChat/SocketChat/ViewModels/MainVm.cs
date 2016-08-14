@@ -47,6 +47,9 @@ namespace SocketChat.ViewModels
             await _tcpClient.ConnectAsync(ip, ServerPort.Value);
             _stream = _tcpClient.GetStream();
 
+            var bytes = Encoding.UTF8.GetBytes("Isildur");
+            await _stream.WriteAsync(bytes, 0, bytes.Length);
+
             IsConnected = true;
             OnPropertyChanged(nameof(IsConnected));
         }
@@ -72,8 +75,11 @@ namespace SocketChat.ViewModels
 
         public ICommand SendCommand { get; private set; }
 
-        private void Send()
+        private async void Send()
         {
+            var bytes = Encoding.UTF8.GetBytes("Isildur");
+            await _stream.WriteAsync(bytes, 0, bytes.Length);
+
             _outputSb.AppendLine($"{DateTime.Now:t} Me: {Input}");
             Output = _outputSb.ToString();
             Input = string.Empty;
