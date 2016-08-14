@@ -42,14 +42,17 @@
             </Grid.ColumnDefinitions>
 
             <TextBlock Text="Server IP:" />
-            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ServerIp, Mode=TwoWay}" />
+            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ServerIp, Mode=TwoWay}"
+                     IsEnabled="{Binding IsConnected, Converter={StaticResource InverseBooleanConverter}}" />
 
             <TextBlock Grid.Row="1" Grid.Column="0" Text="Server port:" />
             <TextBox Grid.Row="1" Grid.Column="1"
-                     Text="{Binding ServerPort, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-            
+                     Text="{Binding ServerPort, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     IsEnabled="{Binding IsConnected, Converter={StaticResource InverseBooleanConverter}}" />
+
             <TextBlock Grid.Row="2" Grid.Column="0" Text="Nickname" />
-            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Nickname, Mode=TwoWay}" />
+            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Nickname, Mode=TwoWay}"
+                     IsEnabled="{Binding IsConnected, Converter={StaticResource InverseBooleanConverter}}" />
 
             <Button Grid.Row="3" Grid.Column="1" Content="Connect" Margin="3" Width="80" HorizontalAlignment="Right"
                     Visibility="{Binding IsConnected, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter='Inverse'}"

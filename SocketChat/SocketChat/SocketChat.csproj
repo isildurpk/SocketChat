@@ -64,6 +64,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Insfrastructure\Converters\BooleanToVisibilityConverter.cs" />
+    <Compile Include="Insfrastructure\Converters\InverseBooleanConverter.cs" />
     <Compile Include="Insfrastructure\NotifyPropertyChangedBase.cs" />
     <Compile Include="Insfrastructure\RelayCommand.cs" />
     <Compile Include="Properties\Annotations.cs" />
