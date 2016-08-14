@@ -12,6 +12,7 @@ namespace Server
         private readonly ServerObject _server;
         private readonly TcpClient _tcpClient;
         private readonly NetworkStream _stream;
+        private string _nickname;
 
         #endregion
 
@@ -46,13 +47,13 @@ namespace Server
 
         public async void Start()
         {
-            var nickname = await GetMessageAsync();
-            _server.BroadcastMessage($"{nickname} connected to chat", this);
+            _nickname = await GetMessageAsync();
+            _server.BroadcastMessage($"{_nickname} connected to the chat", this);
 
             while (true)
             {
                 var message = await GetMessageAsync();
-                _server.BroadcastMessage(message, this);
+                _server.BroadcastMessage($"{_nickname}: {message}", this);
             }
         }
 

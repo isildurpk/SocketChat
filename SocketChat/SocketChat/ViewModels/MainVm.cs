@@ -130,7 +130,7 @@ namespace SocketChat.ViewModels
                     sb.Append(Encoding.UTF8.GetString(bytes, 0, count));
                 } while (_stream.DataAvailable);
 
-                _outputSb.AppendLine(sb.ToString());
+                _outputSb.AppendLine($"{DateTime.Now:t} {sb}");
                 sb.Clear();
                 Output = _outputSb.ToString();
                 OnPropertyChanged(nameof(Output));

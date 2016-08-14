@@ -51,7 +51,7 @@ namespace Server
 
         public void BroadcastMessage(string message, ClientObject exceptClient = null)
         {
-            Console.WriteLine(message);
+            Console.WriteLine($"{DateTime.Now:t} {message}");
             foreach (var client in _clients.Where(x => x != exceptClient))
             {
                 client.Send(message);
