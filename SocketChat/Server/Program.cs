@@ -14,8 +14,6 @@ namespace Server
             }
 
             server.Stop();
-            Console.Write("Press any key...");
-            Console.ReadKey(true);
         }
     }
 }

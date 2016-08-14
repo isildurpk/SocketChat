@@ -48,7 +48,7 @@ namespace SocketChat.ViewModels
             await _tcpClient.ConnectAsync(ip, ServerPort.Value);
             _stream = _tcpClient.GetStream();
 
-            var bytes = Encoding.UTF8.GetBytes("Isildur");
+            var bytes = Encoding.UTF8.GetBytes(Nickname);
             await _stream.WriteAsync(bytes, 0, bytes.Length);
 
             IsConnected = true;
@@ -59,7 +59,8 @@ namespace SocketChat.ViewModels
 
         private bool CanConnect()
         {
-            return !IsConnected && !string.IsNullOrEmpty(ServerIp) && ServerPort > 0;
+            return !IsConnected && !string.IsNullOrEmpty(ServerIp) && ServerPort > 0 &&
+                   !string.IsNullOrEmpty(Nickname);
         }
 
         public ICommand DisconnectCommand { get; private set; }
@@ -105,6 +106,8 @@ namespace SocketChat.ViewModels
         public string Input { get; set; }
 
         public string Output { get; private set; }
+
+        public string Nickname { get; set; } = "Isildur";
 
         public string ServerIp { get; set; } = "127.0.0.1";
 

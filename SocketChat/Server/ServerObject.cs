@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 
 namespace Server
@@ -50,7 +49,7 @@ namespace Server
 
         #region Methods
 
-        public void BroadcastMessage(string message, ClientObject exceptClient)
+        public void BroadcastMessage(string message, ClientObject exceptClient = null)
         {
             Console.WriteLine(message);
             foreach (var client in _clients.Where(x => x != exceptClient))
