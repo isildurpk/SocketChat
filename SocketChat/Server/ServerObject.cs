@@ -16,11 +16,15 @@ namespace Server
 
         #endregion
 
-        #region Implementation of IServer
+        #region Properties
 
         public bool IsListenning { get; private set; }
 
         public ushort Port { get; private set; }
+
+        #endregion
+
+        #region Methods
 
         public void Start(ushort port)
         {
@@ -45,10 +49,6 @@ namespace Server
             }
         }
 
-        #endregion
-
-        #region Methods
-
         public void BroadcastMessage(string message, ClientObject exceptClient = null)
         {
             Console.WriteLine($"{DateTime.Now:t} {message}");
@@ -70,7 +70,12 @@ namespace Server
                     var tcpClient = await _tcpListener.AcceptTcpClientAsync();
                     var client = new ClientObject(tcpClient, this);
                     _clients.Add(client);
-                    ThreadPool.QueueUserWorkItem(state => client.Start());
+                    ThreadPool.QueueUserWorkItem(async state =>
+                    {
+                        await client.StartAsync();
+                        _clients.Remove(client);
+                        client.Dispose();
+                    });
                 }
                 catch (ObjectDisposedException)
                 {

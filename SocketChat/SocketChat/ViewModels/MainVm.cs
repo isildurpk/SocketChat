@@ -119,21 +119,27 @@ namespace SocketChat.ViewModels
 
         private async void ReceiveMessages()
         {
-            var sb = new StringBuilder();
-            var bytes = new byte[128];
-
-            while (IsConnected)
+            try
             {
-                do
-                {
-                    var count = await _stream.ReadAsync(bytes, 0, bytes.Length);
-                    sb.Append(Encoding.UTF8.GetString(bytes, 0, count));
-                } while (_stream.DataAvailable);
+                var sb = new StringBuilder();
+                var bytes = new byte[128];
 
-                _outputSb.AppendLine($"{DateTime.Now:t} {sb}");
-                sb.Clear();
-                Output = _outputSb.ToString();
-                OnPropertyChanged(nameof(Output));
+                while (IsConnected)
+                {
+                    do
+                    {
+                        var count = await _stream.ReadAsync(bytes, 0, bytes.Length);
+                        sb.Append(Encoding.UTF8.GetString(bytes, 0, count));
+                    } while (_stream.DataAvailable);
+
+                    _outputSb.AppendLine($"{DateTime.Now:t} {sb}");
+                    sb.Clear();
+                    Output = _outputSb.ToString();
+                    OnPropertyChanged(nameof(Output));
+                }
+            }
+            catch (ObjectDisposedException) // Отключились
+            {
             }
         }
 

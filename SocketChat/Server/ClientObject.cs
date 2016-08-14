@@ -45,14 +45,20 @@ namespace Server
             await _stream.WriteAsync(bytes, 0, bytes.Length);
         }
 
-        public async void Start()
+        public async Task StartAsync()
         {
             _nickname = await GetMessageAsync();
             _server.BroadcastMessage($"{_nickname} connected to the chat", this);
-
+            
             while (true)
             {
                 var message = await GetMessageAsync();
+                if (string.IsNullOrEmpty(message))
+                {
+                    _server.BroadcastMessage($"{_nickname} leave the chat");
+                    break;
+                }
+
                 _server.BroadcastMessage($"{_nickname}: {message}", this);
             }
         }
