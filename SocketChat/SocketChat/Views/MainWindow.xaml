@@ -22,6 +22,7 @@
         <Grid.RowDefinitions>
             <RowDefinition />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200" />
@@ -73,5 +74,8 @@
             <Button Grid.Column="1" Content="Send" Padding="8 3" Margin="3"
                     Command="{Binding SendCommand}" />
         </Grid>
+
+        <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                   Text="{Binding InfoMessage}" />
     </Grid>
 </Window>

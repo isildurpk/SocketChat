@@ -19,6 +19,7 @@ namespace SocketChat.ViewModels
         private readonly StringBuilder _outputSb = new StringBuilder();
         private TcpClient _tcpClient;
         private NetworkStream _stream;
+        private string _infoMessage;
 
         #endregion
 
@@ -40,13 +41,33 @@ namespace SocketChat.ViewModels
         [SuppressMessage("ReSharper", "PossibleInvalidOperationException")]
         private async void Connect()
         {
-            var random = new Random();
-            var localIep = new IPEndPoint(IPAddress.Loopback, random.Next(LocalPortFrom, LocalPortTo));
-            _tcpClient = new TcpClient(localIep);
+            InfoMessage = string.Empty;
 
-            var ip = IPAddress.Parse(ServerIp);
-            await _tcpClient.ConnectAsync(ip, ServerPort.Value);
-            _stream = _tcpClient.GetStream();
+            try
+            {
+                var random = new Random();
+                var port = random.Next(LocalPortFrom, LocalPortTo);
+                var localIep = new IPEndPoint(IPAddress.Loopback, port);
+                _tcpClient = new TcpClient(localIep);
+            }
+            catch (SocketException e)
+            {
+                InfoMessage = e.Message;
+                return;
+            }
+
+            try
+            {
+                var serverIp = IPAddress.Parse(ServerIp);
+                await _tcpClient.ConnectAsync(serverIp, ServerPort.Value);
+                _stream = _tcpClient.GetStream();
+            }
+            catch (SocketException)
+            {
+                InfoMessage = $"Can`t connect to the server {ServerIp}:{ServerPort}";
+                _tcpClient.Close();
+                return;
+            }
 
             var bytes = Encoding.UTF8.GetBytes(Nickname);
             await _stream.WriteAsync(bytes, 0, bytes.Length);
@@ -104,6 +125,16 @@ namespace SocketChat.ViewModels
         public bool IsConnected { get; set; }
 
         public string Input { get; set; }
+
+        public string InfoMessage
+        {
+            get { return _infoMessage; }
+            private set
+            {
+                _infoMessage = value;
+                OnPropertyChanged();
+            }
+        }
 
         public string Output { get; private set; }
 

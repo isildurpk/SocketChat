@@ -55,7 +55,7 @@ namespace Server
                 var message = await GetMessageAsync();
                 if (string.IsNullOrEmpty(message))
                 {
-                    _server.BroadcastMessage($"{_nickname} leave the chat");
+                    _server.BroadcastMessage($"{_nickname} leaves the chat");
                     break;
                 }
 
