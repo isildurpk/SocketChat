@@ -131,6 +131,8 @@ namespace SocketChat.ViewModels
             get { return _infoMessage; }
             private set
             {
+                if (_infoMessage == value)
+                    return;
                 _infoMessage = value;
                 OnPropertyChanged();
             }
@@ -169,7 +171,7 @@ namespace SocketChat.ViewModels
                     OnPropertyChanged(nameof(Output));
                 }
             }
-            catch (ObjectDisposedException) // Отключились
+            catch (ObjectDisposedException)
             {
             }
         }
