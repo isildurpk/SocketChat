@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using ServerUtils.Interfaces;
 
 namespace Server
 {
@@ -11,8 +12,19 @@ namespace Server
     {
         #region Fields
 
+        private readonly ICompressor _compressor;
+
         private readonly IList<ClientObject> _clients = new List<ClientObject>();
         private TcpListener _tcpListener;
+
+        #endregion
+
+        #region Constructors
+
+        public ServerObject(ICompressor compressor)
+        {
+            _compressor = compressor;
+        }
 
         #endregion
 
@@ -68,7 +80,7 @@ namespace Server
                 try
                 {
                     var tcpClient = await _tcpListener.AcceptTcpClientAsync();
-                    var client = new ClientObject(tcpClient, this);
+                    var client = new ClientObject(tcpClient, this, _compressor);
                     _clients.Add(client);
                     ThreadPool.QueueUserWorkItem(async state =>
                     {

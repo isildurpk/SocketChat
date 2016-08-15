@@ -76,7 +76,8 @@ namespace SocketChat.ViewModels
             }
 
             var bytes = Encoding.UTF8.GetBytes(Nickname);
-            await _stream.WriteAsync(bytes, 0, bytes.Length);
+            var compressedBytes = await _compressor.CompressAsync(bytes);
+            await _stream.WriteAsync(compressedBytes, 0, compressedBytes.Length);
 
             IsConnected = true;
             OnPropertyChanged(nameof(IsConnected));

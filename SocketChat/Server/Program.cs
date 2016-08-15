@@ -1,4 +1,5 @@
 ﻿using System;
+using ServerUtils;
 
 namespace Server
 {
@@ -6,7 +7,7 @@ namespace Server
     {
         public static void Main(string[] args)
         {
-            var server = new ServerObject();
+            var server = new ServerObject(new Compressor());
             server.Start(56000);
 
             while (Console.ReadKey().Key != ConsoleKey.Escape)

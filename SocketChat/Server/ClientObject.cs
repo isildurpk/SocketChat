@@ -1,14 +1,18 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using ServerUtils.Interfaces;
 
 namespace Server
 {
     internal class ClientObject : IDisposable
     {
         #region Fields
+
+        private readonly ICompressor _compressor;
 
         private readonly ServerObject _server;
         private readonly TcpClient _tcpClient;
@@ -19,11 +23,13 @@ namespace Server
 
         #region Constructors
 
-        public ClientObject(TcpClient tcpClient, ServerObject server)
+        public ClientObject(TcpClient tcpClient, ServerObject server, ICompressor compressor)
         {
             _tcpClient = tcpClient;
             _stream = tcpClient.GetStream();
             _server = server;
+
+            _compressor = compressor;
         }
 
         #endregion
@@ -66,15 +72,16 @@ namespace Server
 
         private async Task<string> GetMessageAsync()
         {
-            var sb = new StringBuilder();
+            var messageBytes = new List<byte>();
 
             try
             {
-                var bytes = new byte[128];
+                var bytes = new byte[1024];
                 do
                 {
                     var count = await _stream.ReadAsync(bytes, 0, bytes.Length);
-                    sb.Append(Encoding.UTF8.GetString(bytes, 0, count));
+                    for (int i = 0; i < count; i++)
+                        messageBytes.Add(bytes[i]);
                 } while (_stream.DataAvailable);
             }
             catch (IOException)
@@ -83,7 +90,8 @@ namespace Server
                 return null;
             }
 
-            return sb.ToString();
+            var decompressedBytes = await _compressor.DecompressAsync(messageBytes.ToArray());
+            return Encoding.UTF8.GetString(decompressedBytes, 0, decompressedBytes.Length);
         }
 
         #endregion

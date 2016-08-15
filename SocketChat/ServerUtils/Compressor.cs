@@ -32,7 +32,7 @@ namespace ServerUtils
                 using (var output = new MemoryStream())
                 {
                     using (var gs = new GZipStream(input, CompressionMode.Decompress))
-                        input.CopyTo(gs);
+                        gs.CopyTo(output);
                     return output.ToArray();
                 }
             });
