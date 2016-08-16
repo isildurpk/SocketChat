@@ -53,7 +53,7 @@ namespace SocketChat.ViewModels
             {
                 var random = new Random();
                 var port = random.Next(LocalPortFrom, LocalPortTo);
-                var localIep = new IPEndPoint(IPAddress.Loopback, port);
+                var localIep = new IPEndPoint(IPAddress.Any, port);
                 _tcpClient = new TcpClient(localIep);
             }
             catch (SocketException e)
