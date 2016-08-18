@@ -2,9 +2,9 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using ServerUtils;
 using ServerUtils.Interfaces;
@@ -17,6 +17,7 @@ namespace SocketChat.ViewModels
         #region Fields
 
         private readonly ICompressor _compressor;
+        private readonly ICryptographer _cryptographer;
 
         private const ushort LocalPortFrom = 55000;
         private const ushort LocalPortTo = 55999;
