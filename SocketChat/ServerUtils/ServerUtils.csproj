@@ -43,6 +43,7 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="Interfaces\ICompressor.cs" />
     <Compile Include="Compressor.cs" />
+    <Compile Include="Interfaces\ICryptographer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
