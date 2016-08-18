@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using ServerUtils;
 using ServerUtils.Interfaces;
@@ -75,9 +76,7 @@ namespace SocketChat.ViewModels
                 return;
             }
 
-            var bytes = Encoding.UTF8.GetBytes(Nickname);
-            var compressedBytes = await _compressor.CompressAsync(bytes);
-            await _stream.WriteAsync(compressedBytes, 0, compressedBytes.Length);
+            SendMesage(Nickname);
 
             IsConnected = true;
             OnPropertyChanged(nameof(IsConnected));
@@ -107,11 +106,9 @@ namespace SocketChat.ViewModels
 
         public ICommand SendCommand { get; private set; }
 
-        private async void Send()
+        private void Send()
         {
-            var bytes = Encoding.UTF8.GetBytes(Input);
-            var compressedBytes = await _compressor.CompressAsync(bytes);
-            await _stream.WriteAsync(compressedBytes, 0, compressedBytes.Length);
+            SendMesage(Input);
 
             _outputSb.AppendLine($"{DateTime.Now:t} Me: {Input}");
             Output = _outputSb.ToString();
@@ -182,6 +179,13 @@ namespace SocketChat.ViewModels
             catch (ObjectDisposedException)
             {
             }
+        }
+
+        private async void SendMesage(string message)
+        {
+            var bytes = Encoding.UTF8.GetBytes(message);
+            var compressedBytes = await _compressor.CompressAsync(bytes);
+            await _stream.WriteAsync(compressedBytes, 0, compressedBytes.Length);
         }
 
         #endregion
