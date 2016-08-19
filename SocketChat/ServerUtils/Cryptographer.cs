@@ -3,29 +3,45 @@ using ServerUtils.Interfaces;
 
 namespace ServerUtils
 {
-    public class Cryptographer : ICryptographer
+    public sealed class Cryptographer : ICryptographer
     {
-        #region Fields
-
-        private CngKey _privateKey;
-
-        #endregion
+        private readonly RSACryptoServiceProvider _rsa;
 
         #region Constructors
 
         public Cryptographer()
         {
+            _rsa = new RSACryptoServiceProvider();
+            PublicKey = _rsa.ExportParameters(false);
         }
 
         #endregion
 
         #region Properties
 
-        public byte[] PublicKey { get; }
+        public RSAParameters PublicKey { get; }
 
         #endregion
 
         #region Methods
+
+        public byte[] Encrypt(byte[] bytes, RSAParameters externalPublicKey)
+        {
+            using (var rsa = new RSACryptoServiceProvider())
+            {
+                rsa.ImportParameters(externalPublicKey);
+                return rsa.Encrypt(bytes, false);
+            }
+        }
+
+        public byte[] Decrypt(byte[] bytes)
+        {
+            using (var rsa = new RSACryptoServiceProvider())
+            {
+                rsa.ImportParameters(_rsa.ExportParameters(true));
+                return rsa.Decrypt(bytes, false);
+            }
+        }
 
         #endregion
     }
