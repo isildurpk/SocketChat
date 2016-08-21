@@ -12,24 +12,24 @@ namespace ServerUtils
         public Cryptographer()
         {
             _rsa = new RSACryptoServiceProvider();
-            PublicKey = _rsa.ExportParameters(false);
+            PublicKeyBlob = _rsa.ExportCspBlob(false);
         }
 
         #endregion
 
         #region Properties
-
-        public RSAParameters PublicKey { get; }
+        
+        public byte[] PublicKeyBlob { get; }
 
         #endregion
 
         #region Methods
 
-        public byte[] Encrypt(byte[] bytes, RSAParameters externalPublicKey)
+        public byte[] Encrypt(byte[] bytes, byte[] externalPublicKey)
         {
             using (var rsa = new RSACryptoServiceProvider())
             {
-                rsa.ImportParameters(externalPublicKey);
+                rsa.ImportCspBlob(externalPublicKey);
                 return rsa.Encrypt(bytes, false);
             }
         }

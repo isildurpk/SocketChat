@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using ServerUtils;
 using ServerUtils.Interfaces;
@@ -34,6 +35,7 @@ namespace SocketChat.ViewModels
         public MainVm()
         {
             _compressor = new Compressor();
+            _cryptographer = new Cryptographer();
 
             ConnectCommand = new RelayCommand(Connect, CanConnect);
             DisconnectCommand = new RelayCommand(Disconnect, CanDisconnect);
@@ -76,7 +78,8 @@ namespace SocketChat.ViewModels
                 _tcpClient.Close();
                 return;
             }
-
+            
+            await SendDataAsync(_cryptographer.PublicKeyBlob);
             SendMesage(Nickname);
 
             IsConnected = true;
@@ -184,9 +187,13 @@ namespace SocketChat.ViewModels
 
         private async void SendMesage(string message)
         {
-            var bytes = Encoding.UTF8.GetBytes(message);
-            var compressedBytes = await _compressor.CompressAsync(bytes);
-            await _stream.WriteAsync(compressedBytes, 0, compressedBytes.Length);
+            var compressedBytes = await _compressor.CompressAsync(message.ToBytes());
+            await SendDataAsync(compressedBytes);
+        }
+
+        private Task SendDataAsync(byte[] data)
+        {
+            return _stream.WriteAsync(data, 0, data.Length);
         }
 
         #endregion

@@ -1,12 +1,10 @@
-﻿using System.Security.Cryptography;
-
-namespace ServerUtils.Interfaces
+﻿namespace ServerUtils.Interfaces
 {
     public interface ICryptographer
     {
-        RSAParameters PublicKey { get; }
+        byte[] PublicKeyBlob { get; }
 
-        byte[] Encrypt(byte[] bytes, RSAParameters externalPublicKey);
+        byte[] Encrypt(byte[] bytes, byte[] externalPublicKey);
 
         byte[] Decrypt(byte[] bytes);
     }

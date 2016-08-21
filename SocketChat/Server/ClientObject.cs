@@ -4,6 +4,7 @@ using System.IO;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using ServerUtils;
 using ServerUtils.Interfaces;
 
 namespace Server
@@ -13,11 +14,13 @@ namespace Server
         #region Fields
 
         private readonly ICompressor _compressor;
+        private readonly ICryptographer _cryptographer;
 
         private readonly ServerObject _server;
         private readonly TcpClient _tcpClient;
         private readonly NetworkStream _stream;
         private string _nickname;
+        private byte[] _publicKeyBlob;
 
         #endregion
 
@@ -30,6 +33,7 @@ namespace Server
             _server = server;
 
             _compressor = compressor;
+            _cryptographer = new Cryptographer();
         }
 
         #endregion
@@ -48,7 +52,7 @@ namespace Server
 
         public async void Send(string message)
         {
-            var bytes = Encoding.UTF8.GetBytes(message);
+            var bytes = message.ToBytes();
             await _stream.WriteAsync(bytes, 0, bytes.Length);
         }
 
@@ -56,7 +60,7 @@ namespace Server
         {
             _nickname = await GetMessageAsync();
             _server.BroadcastMessage($"{_nickname} connected to the chat", this);
-            
+
             while (true)
             {
                 var message = await GetMessageAsync();
@@ -70,9 +74,9 @@ namespace Server
             }
         }
 
-        private async Task<string> GetMessageAsync()
+        private async Task<string> GetMessageAsync(bool compressed = true)
         {
-            var messageBytes = new List<byte>();
+            var messageBytesList = new List<byte>();
 
             try
             {
@@ -81,7 +85,7 @@ namespace Server
                 {
                     var count = await _stream.ReadAsync(bytes, 0, bytes.Length);
                     for (int i = 0; i < count; i++)
-                        messageBytes.Add(bytes[i]);
+                        messageBytesList.Add(bytes[i]);
                 } while (_stream.DataAvailable);
             }
             catch (IOException)
@@ -90,8 +94,8 @@ namespace Server
                 return null;
             }
 
-            var decompressedBytes = await _compressor.DecompressAsync(messageBytes.ToArray());
-            return Encoding.UTF8.GetString(decompressedBytes, 0, decompressedBytes.Length);
+            var messageBytes = compressed ? await _compressor.DecompressAsync(messageBytesList.ToArray()) : messageBytesList.ToArray();
+            return Encoding.UTF8.GetString(messageBytes, 0, messageBytes.Length);
         }
 
         #endregion
