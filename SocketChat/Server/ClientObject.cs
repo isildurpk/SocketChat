@@ -103,8 +103,7 @@ namespace Server
             }
             catch (IOException)
             {
-                // Клиент принудительно закрыли
-                return null;
+                return null; // Client's app was stopped
             }
 
             return messageBytesList.ToArray();
