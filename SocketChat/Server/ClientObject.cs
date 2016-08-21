@@ -14,13 +14,12 @@ namespace Server
         #region Fields
 
         private readonly ICompressor _compressor;
-        private readonly ICryptographer _cryptographer;
 
         private readonly ServerObject _server;
         private readonly TcpClient _tcpClient;
         private readonly NetworkStream _stream;
         private string _nickname;
-        private byte[] _publicKeyBlob;
+        private byte[] _externalPublicKeyBlob;
 
         #endregion
 
@@ -33,7 +32,6 @@ namespace Server
             _server = server;
 
             _compressor = compressor;
-            _cryptographer = new Cryptographer();
         }
 
         #endregion
@@ -52,12 +50,16 @@ namespace Server
 
         public async void Send(string message)
         {
-            var bytes = message.ToBytes();
-            await _stream.WriteAsync(bytes, 0, bytes.Length);
+            var data = await _compressor.CompressAsync(message.ToBytes());
+            data = _server.Cryptographer.Encrypt(data, _externalPublicKeyBlob);
+            await _stream.Send(data);
         }
 
         public async Task StartAsync()
         {
+            _externalPublicKeyBlob = await GetMessageBytesAsync();
+            await _stream.Send(_server.Cryptographer.PublicKeyBlob);
+
             _nickname = await GetMessageAsync();
             _server.BroadcastMessage($"{_nickname} connected to the chat", this);
 
@@ -74,18 +76,29 @@ namespace Server
             }
         }
 
-        private async Task<string> GetMessageAsync(bool compressed = true)
+        private async Task<string> GetMessageAsync()
+        {
+            var messageBytes = await GetMessageBytesAsync();
+            if (messageBytes == null || messageBytes.Length == 0)
+                return null;
+
+            messageBytes = _server.Cryptographer.Decrypt(messageBytes);
+            messageBytes = await _compressor.DecompressAsync(messageBytes);
+            return Encoding.UTF8.GetString(messageBytes, 0, messageBytes.Length);
+        }
+
+        private async Task<byte[]> GetMessageBytesAsync()
         {
             var messageBytesList = new List<byte>();
 
             try
             {
-                var bytes = new byte[1024];
+                var buffer = new byte[1024];
                 do
                 {
-                    var count = await _stream.ReadAsync(bytes, 0, bytes.Length);
+                    var count = await _stream.ReadAsync(buffer, 0, buffer.Length);
                     for (int i = 0; i < count; i++)
-                        messageBytesList.Add(bytes[i]);
+                        messageBytesList.Add(buffer[i]);
                 } while (_stream.DataAvailable);
             }
             catch (IOException)
@@ -94,8 +107,7 @@ namespace Server
                 return null;
             }
 
-            var messageBytes = compressed ? await _compressor.DecompressAsync(messageBytesList.ToArray()) : messageBytesList.ToArray();
-            return Encoding.UTF8.GetString(messageBytes, 0, messageBytes.Length);
+            return messageBytesList.ToArray();
         }
 
         #endregion

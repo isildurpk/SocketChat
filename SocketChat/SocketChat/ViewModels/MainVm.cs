@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Sockets;
-using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -27,6 +27,7 @@ namespace SocketChat.ViewModels
         private TcpClient _tcpClient;
         private NetworkStream _stream;
         private string _infoMessage;
+        private byte[] _serverPublicKeyBlob;
 
         #endregion
 
@@ -79,8 +80,10 @@ namespace SocketChat.ViewModels
                 return;
             }
             
-            await SendDataAsync(_cryptographer.PublicKeyBlob);
-            SendMesage(Nickname);
+            await _stream.Send(_cryptographer.PublicKeyBlob);
+            _serverPublicKeyBlob = await ReceiveMessageBytesAsync();
+
+            await SendMesage(Nickname);
 
             IsConnected = true;
             OnPropertyChanged(nameof(IsConnected));
@@ -110,9 +113,9 @@ namespace SocketChat.ViewModels
 
         public ICommand SendCommand { get; private set; }
 
-        private void Send()
+        private async void Send()
         {
-            SendMesage(Input);
+            await SendMesage(Input);
 
             _outputSb.AppendLine($"{DateTime.Now:t} Me: {Input}");
             Output = _outputSb.ToString();
@@ -164,14 +167,14 @@ namespace SocketChat.ViewModels
             try
             {
                 var sb = new StringBuilder();
-                var bytes = new byte[128];
+                var buffer = new byte[128];
 
                 while (IsConnected)
                 {
                     do
                     {
-                        var count = await _stream.ReadAsync(bytes, 0, bytes.Length);
-                        sb.Append(Encoding.UTF8.GetString(bytes, 0, count));
+                        var count = await _stream.ReadAsync(buffer, 0, buffer.Length);
+                        sb.Append(Encoding.UTF8.GetString(buffer, 0, count));
                     } while (_stream.DataAvailable);
 
                     _outputSb.AppendLine($"{DateTime.Now:t} {sb}");
@@ -185,15 +188,33 @@ namespace SocketChat.ViewModels
             }
         }
 
-        private async void SendMesage(string message)
+        private async Task<byte[]> ReceiveMessageBytesAsync()
         {
-            var compressedBytes = await _compressor.CompressAsync(message.ToBytes());
-            await SendDataAsync(compressedBytes);
+            var messageBytesList = new List<byte>();
+
+            try
+            {
+                var buffer = new byte[1024];
+                do
+                {
+                    var count = await _stream.ReadAsync(buffer, 0, buffer.Length);
+                    for (int i = 0; i < count; i++)
+                        messageBytesList.Add(buffer[i]);
+                } while (_stream.DataAvailable);
+            }
+            catch (ObjectDisposedException)
+            {  
+            }
+
+            return messageBytesList.ToArray();
         }
 
-        private Task SendDataAsync(byte[] data)
+        private async Task SendMesage(string message)
         {
-            return _stream.WriteAsync(data, 0, data.Length);
+            var compressedBytes = await _compressor.CompressAsync(message.ToBytes());
+            var data = _cryptographer.Encrypt(compressedBytes, _serverPublicKeyBlob);
+
+            await _stream.Send(data);
         }
 
         #endregion

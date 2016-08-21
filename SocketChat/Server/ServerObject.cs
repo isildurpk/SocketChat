@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using ServerUtils;
 using ServerUtils.Interfaces;
 
 namespace Server
@@ -24,11 +25,14 @@ namespace Server
         public ServerObject(ICompressor compressor)
         {
             _compressor = compressor;
+            Cryptographer = new Cryptographer();
         }
 
         #endregion
 
         #region Properties
+
+        public ICryptographer Cryptographer { get; }
 
         public bool IsListenning { get; private set; }
 
