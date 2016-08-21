@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
@@ -51,14 +52,14 @@ namespace Server
         public async void Send(string message)
         {
             var data = await _compressor.CompressAsync(message.ToBytes());
-            data = _server.Cryptographer.Encrypt(data, _externalPublicKeyBlob);
+            data = _server.AssymmetricCryptographer.Encrypt(data, _externalPublicKeyBlob);
             await _stream.Send(data);
         }
 
         public async Task StartAsync()
         {
             _externalPublicKeyBlob = await GetMessageBytesAsync();
-            await _stream.Send(_server.Cryptographer.PublicKeyBlob);
+            await _stream.Send(_server.AssymmetricCryptographer.PublicKeyBlob);
 
             _nickname = await GetMessageAsync();
             _server.BroadcastMessage($"{_nickname} connected to the chat", this);
@@ -82,7 +83,7 @@ namespace Server
             if (messageBytes == null || messageBytes.Length == 0)
                 return null;
 
-            messageBytes = _server.Cryptographer.Decrypt(messageBytes);
+            messageBytes = _server.AssymmetricCryptographer.Decrypt(messageBytes);
             messageBytes = await _compressor.DecompressAsync(messageBytes);
             return Encoding.UTF8.GetString(messageBytes, 0, messageBytes.Length);
         }

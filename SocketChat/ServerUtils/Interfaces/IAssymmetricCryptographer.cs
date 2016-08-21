@@ -1,6 +1,6 @@
 ﻿namespace ServerUtils.Interfaces
 {
-    public interface ICryptographer
+    public interface IAssymmetricCryptographer
     {
         byte[] PublicKeyBlob { get; }
 

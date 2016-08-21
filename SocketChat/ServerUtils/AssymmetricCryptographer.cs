@@ -3,13 +3,17 @@ using ServerUtils.Interfaces;
 
 namespace ServerUtils
 {
-    public sealed class Cryptographer : ICryptographer
+    public sealed class AssymmetricCryptographer : IAssymmetricCryptographer
     {
+        #region Fields
+
         private readonly RSACryptoServiceProvider _rsa;
+
+        #endregion
 
         #region Constructors
 
-        public Cryptographer()
+        public AssymmetricCryptographer()
         {
             _rsa = new RSACryptoServiceProvider();
             PublicKeyBlob = _rsa.ExportCspBlob(false);

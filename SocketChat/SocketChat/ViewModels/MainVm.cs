@@ -18,7 +18,7 @@ namespace SocketChat.ViewModels
         #region Fields
 
         private readonly ICompressor _compressor;
-        private readonly ICryptographer _cryptographer;
+        private readonly IAssymmetricCryptographer _assymmetricCryptographer;
 
         private const ushort LocalPortFrom = 55000;
         private const ushort LocalPortTo = 55999;
@@ -36,7 +36,7 @@ namespace SocketChat.ViewModels
         public MainVm()
         {
             _compressor = new Compressor();
-            _cryptographer = new Cryptographer();
+            _assymmetricCryptographer = new AssymmetricCryptographer();
 
             ConnectCommand = new RelayCommand(Connect, CanConnect);
             DisconnectCommand = new RelayCommand(Disconnect, CanDisconnect);
@@ -80,7 +80,7 @@ namespace SocketChat.ViewModels
                 return;
             }
             
-            await _stream.Send(_cryptographer.PublicKeyBlob);
+            await _stream.Send(_assymmetricCryptographer.PublicKeyBlob);
             _serverPublicKeyBlob = await ReceiveMessageBytesAsync();
 
             await SendMesage(Nickname);
@@ -212,7 +212,7 @@ namespace SocketChat.ViewModels
         private async Task SendMesage(string message)
         {
             var compressedBytes = await _compressor.CompressAsync(message.ToBytes());
-            var data = _cryptographer.Encrypt(compressedBytes, _serverPublicKeyBlob);
+            var data = _assymmetricCryptographer.Encrypt(compressedBytes, _serverPublicKeyBlob);
 
             await _stream.Send(data);
         }

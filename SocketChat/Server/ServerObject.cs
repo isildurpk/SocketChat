@@ -25,14 +25,14 @@ namespace Server
         public ServerObject(ICompressor compressor)
         {
             _compressor = compressor;
-            Cryptographer = new Cryptographer();
+            AssymmetricCryptographer = new AssymmetricCryptographer();
         }
 
         #endregion
 
         #region Properties
 
-        public ICryptographer Cryptographer { get; }
+        public IAssymmetricCryptographer AssymmetricCryptographer { get; }
 
         public bool IsListenning { get; private set; }
 
