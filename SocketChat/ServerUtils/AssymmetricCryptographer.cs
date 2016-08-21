@@ -1,9 +1,10 @@
-﻿using System.Security.Cryptography;
+﻿using System;
+using System.Security.Cryptography;
 using ServerUtils.Interfaces;
 
 namespace ServerUtils
 {
-    public sealed class AssymmetricCryptographer : IAssymmetricCryptographer
+    public sealed class AssymmetricCryptographer : IAssymmetricCryptographer, IDisposable
     {
         #region Fields
 
@@ -45,6 +46,15 @@ namespace ServerUtils
                 rsa.ImportParameters(_rsa.ExportParameters(true));
                 return rsa.Decrypt(bytes, false);
             }
+        }
+
+        #endregion
+
+        #region Implementation of IDisposable
+
+        public void Dispose()
+        {
+            _rsa.Dispose();
         }
 
         #endregion
