@@ -81,8 +81,7 @@ namespace SocketChat.ViewModels
             using (var ac = new AssymmetricCryptographer())
             {
                 await _stream.Send(ac.PublicKeyBlob);
-                var serverPublicKeyBlob = await ReceiveMessageBytesAsync();
-                _cryptoKey = ac.Decrypt(await ReceiveMessageBytesAsync());
+                _cryptoKey = ac.Decrypt(await GetMessageBytesAsync());
             }
 
             await SendMesage(Nickname);
@@ -190,7 +189,7 @@ namespace SocketChat.ViewModels
             }
         }
 
-        private async Task<byte[]> ReceiveMessageBytesAsync()
+        private async Task<byte[]> GetMessageBytesAsync()
         {
             var messageBytesList = new List<byte>();
 

@@ -17,6 +17,7 @@ namespace Server
 
         private readonly IList<ClientObject> _clients = new List<ClientObject>();
         private TcpListener _tcpListener;
+        private readonly byte[] _cryptoKey;
 
         #endregion
 
@@ -25,14 +26,12 @@ namespace Server
         public ServerObject(ICompressor compressor)
         {
             _compressor = compressor;
-            AssymmetricCryptographer = new AssymmetricCryptographer();
+            _cryptoKey = Cryptographer.GenerateKey();
         }
 
         #endregion
 
         #region Properties
-
-        public IAssymmetricCryptographer AssymmetricCryptographer { get; }
 
         public bool IsListenning { get; private set; }
 
@@ -84,7 +83,7 @@ namespace Server
                 try
                 {
                     var tcpClient = await _tcpListener.AcceptTcpClientAsync();
-                    var client = new ClientObject(tcpClient, this, _compressor);
+                    var client = new ClientObject(tcpClient, this, _compressor, _cryptoKey);
                     _clients.Add(client);
                     ThreadPool.QueueUserWorkItem(async state =>
                     {

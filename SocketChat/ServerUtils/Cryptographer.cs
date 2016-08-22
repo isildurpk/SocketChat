@@ -11,5 +11,10 @@
         {
             return null;
         }
+
+        public static byte[] GenerateKey()
+        {
+            return null;
+        }
     }
 }

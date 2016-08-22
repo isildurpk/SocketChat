@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
@@ -20,19 +19,19 @@ namespace Server
         private readonly TcpClient _tcpClient;
         private readonly NetworkStream _stream;
         private string _nickname;
-        private byte[] _externalPublicKeyBlob;
+        private readonly byte[] _cryptoKey;
 
         #endregion
 
         #region Constructors
 
-        public ClientObject(TcpClient tcpClient, ServerObject server, ICompressor compressor)
+        public ClientObject(TcpClient tcpClient, ServerObject server, ICompressor compressor, byte[] cryptoKey)
         {
             _tcpClient = tcpClient;
             _stream = tcpClient.GetStream();
             _server = server;
-
             _compressor = compressor;
+            _cryptoKey = cryptoKey;
         }
 
         #endregion
@@ -52,14 +51,17 @@ namespace Server
         public async void Send(string message)
         {
             var data = await _compressor.CompressAsync(message.ToBytes());
-            data = _server.AssymmetricCryptographer.Encrypt(data, _externalPublicKeyBlob);
+            data = Cryptographer.Encrypt(data, _cryptoKey);
             await _stream.Send(data);
         }
 
         public async Task StartAsync()
         {
-            _externalPublicKeyBlob = await GetMessageBytesAsync();
-            await _stream.Send(_server.AssymmetricCryptographer.PublicKeyBlob);
+            using (var ac = new AssymmetricCryptographer())
+            {
+                var clientPublicKeyBlob = await GetMessageBytesAsync();
+                await _stream.Send(ac.Encrypt(_cryptoKey, clientPublicKeyBlob));
+            }
 
             _nickname = await GetMessageAsync();
             _server.BroadcastMessage($"{_nickname} connected to the chat", this);
@@ -83,7 +85,7 @@ namespace Server
             if (messageBytes == null || messageBytes.Length == 0)
                 return null;
 
-            messageBytes = _server.AssymmetricCryptographer.Decrypt(messageBytes);
+            messageBytes = Cryptographer.Decrypt(messageBytes, _cryptoKey);
             messageBytes = await _compressor.DecompressAsync(messageBytes);
             return Encoding.UTF8.GetString(messageBytes, 0, messageBytes.Length);
         }
