@@ -171,7 +171,7 @@ namespace SocketChat.ViewModels
                 var message = await GetMessageBytesAsync();
                 message = await message.Decrypt(_cryptoKey).DecompressAsync();
 
-                _outputSb.AppendLine($"{DateTime.Now:t} {message}");
+                _outputSb.AppendLine($"{DateTime.Now:t} {Encoding.UTF8.GetString(message)}");
                 Output = _outputSb.ToString();
                 OnPropertyChanged(nameof(Output));
             }
