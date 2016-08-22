@@ -46,8 +46,8 @@ namespace Server
 
         public async void Send(string message)
         {
-            var data = await Compressor.CompressAsync(message.ToBytes());
-            await data.Encrypt(_cryptoKey).SendToStream(_stream);
+            var compressedBytes = await message.ToBytes().CompressAsync();
+            await compressedBytes.Encrypt(_cryptoKey).SendToStream(_stream);
         }
 
         public async Task StartAsync()
@@ -80,7 +80,7 @@ namespace Server
             if (messageBytes == null || messageBytes.Length == 0)
                 return null;
             
-            messageBytes = await Compressor.DecompressAsync(messageBytes.Decrypt(_cryptoKey));
+            messageBytes = await messageBytes.Decrypt(_cryptoKey).DecompressAsync();
             return Encoding.UTF8.GetString(messageBytes, 0, messageBytes.Length);
         }
 

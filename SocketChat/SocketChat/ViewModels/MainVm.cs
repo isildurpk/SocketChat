@@ -207,7 +207,7 @@ namespace SocketChat.ViewModels
 
         private async Task SendMesage(string message)
         {
-            var compressedBytes = await Compressor.CompressAsync(message.ToBytes());
+            var compressedBytes = await message.ToBytes().CompressAsync();
             await compressedBytes.Encrypt(_cryptoKey).SendToStream(_stream);
         }
 

@@ -25,5 +25,15 @@ namespace ServerUtils
         {
             return stream.WriteAsync(data, 0, data.Length);
         }
+
+        public static Task<byte[]> CompressAsync(this byte[] data)
+        {
+            return Compressor.CompressAsync(data);
+        }
+
+        public static Task<byte[]> DecompressAsync(this byte[] data)
+        {
+            return Compressor.DecompressAsync(data);
+        }
     }
 }
