@@ -73,18 +73,24 @@ namespace SocketChat.ViewModels
                 return;
             }
 
-            using (var ac = new AssymmetricCryptographer())
+            try
             {
-                await ac.PublicKeyBlob.SendToStream(_stream);
-                _cryptoKey = ac.Decrypt(await GetMessageBytesAsync());
+                using (var ac = new AssymmetricCryptographer())
+                {
+                    await ac.PublicKeyBlob.SendToStream(_stream);
+                    _cryptoKey = ac.Decrypt(await GetMessageBytesAsync());
+                }
+
+                await SendMesage(Nickname);
+
+                IsConnected = true;
+                OnPropertyChanged(nameof(IsConnected));
+
+                ThreadPool.QueueUserWorkItem(state => ReceiveMessages());
             }
-
-            await SendMesage(Nickname);
-
-            IsConnected = true;
-            OnPropertyChanged(nameof(IsConnected));
-
-            ThreadPool.QueueUserWorkItem(state => ReceiveMessages());
+            catch (ObjectDisposedException)
+            {
+            }
         }
 
         private bool CanConnect()
@@ -160,49 +166,29 @@ namespace SocketChat.ViewModels
 
         private async void ReceiveMessages()
         {
-            try
+            while (IsConnected)
             {
-                var sb = new StringBuilder();
-                var buffer = new byte[128];
+                var message = await GetMessageBytesAsync();
+                message = await message.Decrypt(_cryptoKey).DecompressAsync();
 
-                while (IsConnected)
-                {
-                    do
-                    {
-                        var count = await _stream.ReadAsync(buffer, 0, buffer.Length);
-                        sb.Append(Encoding.UTF8.GetString(buffer, 0, count));
-                    } while (_stream.DataAvailable);
-
-                    _outputSb.AppendLine($"{DateTime.Now:t} {sb}");
-                    sb.Clear();
-                    Output = _outputSb.ToString();
-                    OnPropertyChanged(nameof(Output));
-                }
-            }
-            catch (ObjectDisposedException)
-            {
+                _outputSb.AppendLine($"{DateTime.Now:t} {message}");
+                Output = _outputSb.ToString();
+                OnPropertyChanged(nameof(Output));
             }
         }
 
         private async Task<byte[]> GetMessageBytesAsync()
         {
-            var messageBytesList = new List<byte>();
-
-            try
+            var messageContainer = new List<byte>();
+            var buffer = new byte[1024];
+            do
             {
-                var buffer = new byte[1024];
-                do
-                {
-                    var count = await _stream.ReadAsync(buffer, 0, buffer.Length);
-                    for (int i = 0; i < count; i++)
-                        messageBytesList.Add(buffer[i]);
-                } while (_stream.DataAvailable);
-            }
-            catch (ObjectDisposedException)
-            {
-            }
+                var count = await _stream.ReadAsync(buffer, 0, buffer.Length);
+                for (int i = 0; i < count; i++)
+                    messageContainer.Add(buffer[i]);
+            } while (_stream.DataAvailable);
 
-            return messageBytesList.ToArray();
+            return messageContainer.ToArray();
         }
 
         private async Task SendMesage(string message)
