@@ -51,8 +51,7 @@ namespace Server
         public async void Send(string message)
         {
             var data = await _compressor.CompressAsync(message.ToBytes());
-            data = Cryptographer.Encrypt(data, _cryptoKey);
-            await _stream.Send(data);
+            await data.Encrypt(_cryptoKey).SendToStream(_stream);
         }
 
         public async Task StartAsync()
@@ -60,7 +59,7 @@ namespace Server
             using (var ac = new AssymmetricCryptographer())
             {
                 var clientPublicKeyBlob = await GetMessageBytesAsync();
-                await _stream.Send(ac.Encrypt(_cryptoKey, clientPublicKeyBlob));
+                await ac.Encrypt(_cryptoKey, clientPublicKeyBlob).SendToStream(_stream);
             }
 
             _nickname = await GetMessageAsync();
@@ -84,9 +83,8 @@ namespace Server
             var messageBytes = await GetMessageBytesAsync();
             if (messageBytes == null || messageBytes.Length == 0)
                 return null;
-
-            messageBytes = Cryptographer.Decrypt(messageBytes, _cryptoKey);
-            messageBytes = await _compressor.DecompressAsync(messageBytes);
+            
+            messageBytes = await _compressor.DecompressAsync(messageBytes.Decrypt(_cryptoKey));
             return Encoding.UTF8.GetString(messageBytes, 0, messageBytes.Length);
         }
 

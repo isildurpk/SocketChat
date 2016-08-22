@@ -11,7 +11,17 @@ namespace ServerUtils
             return Encoding.UTF8.GetBytes(str);
         }
 
-        public static Task Send(this NetworkStream stream, byte[] data)
+        public static byte[] Encrypt(this byte[] data, byte[] key)
+        {
+            return Cryptographer.Encrypt(data, key);
+        }
+
+        public static byte[] Decrypt(this byte[] data, byte[] key)
+        {
+            return Cryptographer.Decrypt(data, key);
+        }
+
+        public static Task SendToStream(this byte[] data, NetworkStream stream)
         {
             return stream.WriteAsync(data, 0, data.Length);
         }

@@ -80,7 +80,7 @@ namespace SocketChat.ViewModels
 
             using (var ac = new AssymmetricCryptographer())
             {
-                await _stream.Send(ac.PublicKeyBlob);
+                await ac.PublicKeyBlob.SendToStream(_stream);
                 _cryptoKey = ac.Decrypt(await GetMessageBytesAsync());
             }
 
@@ -204,7 +204,7 @@ namespace SocketChat.ViewModels
                 } while (_stream.DataAvailable);
             }
             catch (ObjectDisposedException)
-            {  
+            {
             }
 
             return messageBytesList.ToArray();
@@ -213,9 +213,7 @@ namespace SocketChat.ViewModels
         private async Task SendMesage(string message)
         {
             var compressedBytes = await _compressor.CompressAsync(message.ToBytes());
-            var data = Cryptographer.Encrypt(compressedBytes, _cryptoKey);
-
-            await _stream.Send(data);
+            await compressedBytes.Encrypt(_cryptoKey).SendToStream(_stream);
         }
 
         #endregion
