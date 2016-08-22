@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Security.Cryptography;
-using ServerUtils.Interfaces;
 
 namespace ServerUtils
 {
-    public sealed class AssymmetricCryptographer : IAssymmetricCryptographer, IDisposable
+    public sealed class AssymmetricCryptographer : IDisposable
     {
         #region Fields
 
