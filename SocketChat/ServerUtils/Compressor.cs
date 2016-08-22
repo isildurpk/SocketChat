@@ -1,15 +1,12 @@
 ﻿using System.IO;
 using System.IO.Compression;
 using System.Threading.Tasks;
-using ServerUtils.Interfaces;
 
 namespace ServerUtils
 {
-    public class Compressor : ICompressor
+    public static class Compressor
     {
-        #region Implementation of ICompressor
-
-        public Task<byte[]> CompressAsync(byte[] bytes)
+        public static Task<byte[]> CompressAsync(byte[] bytes)
         {
             return Task.Run(() =>
             {
@@ -23,7 +20,7 @@ namespace ServerUtils
             });
         }
 
-        public Task<byte[]> DecompressAsync(byte[] bytes)
+        public static Task<byte[]> DecompressAsync(byte[] bytes)
         {
             return Task.Run(() =>
             {
@@ -36,7 +33,5 @@ namespace ServerUtils
                 }
             });
         }
-
-        #endregion
     }
 }

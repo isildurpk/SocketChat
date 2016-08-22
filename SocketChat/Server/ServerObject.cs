@@ -5,15 +5,12 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using ServerUtils;
-using ServerUtils.Interfaces;
 
 namespace Server
 {
     internal class ServerObject
     {
         #region Fields
-
-        private readonly ICompressor _compressor;
 
         private readonly IList<ClientObject> _clients = new List<ClientObject>();
         private TcpListener _tcpListener;
@@ -23,9 +20,8 @@ namespace Server
 
         #region Constructors
 
-        public ServerObject(ICompressor compressor)
+        public ServerObject()
         {
-            _compressor = compressor;
             _cryptoKey = Cryptographer.GenerateKey();
         }
 
@@ -83,7 +79,7 @@ namespace Server
                 try
                 {
                     var tcpClient = await _tcpListener.AcceptTcpClientAsync();
-                    var client = new ClientObject(tcpClient, this, _compressor, _cryptoKey);
+                    var client = new ClientObject(tcpClient, this, _cryptoKey);
                     _clients.Add(client);
                     ThreadPool.QueueUserWorkItem(async state =>
                     {

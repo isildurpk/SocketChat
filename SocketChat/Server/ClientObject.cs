@@ -5,16 +5,13 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using ServerUtils;
-using ServerUtils.Interfaces;
 
 namespace Server
 {
     internal class ClientObject : IDisposable
     {
         #region Fields
-
-        private readonly ICompressor _compressor;
-
+        
         private readonly ServerObject _server;
         private readonly TcpClient _tcpClient;
         private readonly NetworkStream _stream;
@@ -25,12 +22,11 @@ namespace Server
 
         #region Constructors
 
-        public ClientObject(TcpClient tcpClient, ServerObject server, ICompressor compressor, byte[] cryptoKey)
+        public ClientObject(TcpClient tcpClient, ServerObject server, byte[] cryptoKey)
         {
             _tcpClient = tcpClient;
             _stream = tcpClient.GetStream();
             _server = server;
-            _compressor = compressor;
             _cryptoKey = cryptoKey;
         }
 
@@ -50,7 +46,7 @@ namespace Server
 
         public async void Send(string message)
         {
-            var data = await _compressor.CompressAsync(message.ToBytes());
+            var data = await Compressor.CompressAsync(message.ToBytes());
             await data.Encrypt(_cryptoKey).SendToStream(_stream);
         }
 
@@ -84,7 +80,7 @@ namespace Server
             if (messageBytes == null || messageBytes.Length == 0)
                 return null;
             
-            messageBytes = await _compressor.DecompressAsync(messageBytes.Decrypt(_cryptoKey));
+            messageBytes = await Compressor.DecompressAsync(messageBytes.Decrypt(_cryptoKey));
             return Encoding.UTF8.GetString(messageBytes, 0, messageBytes.Length);
         }
 

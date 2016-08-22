@@ -43,7 +43,6 @@
     <Compile Include="AssymmetricCryptographer.cs" />
     <Compile Include="Cryptographer.cs" />
     <Compile Include="Extensions.cs" />
-    <Compile Include="Interfaces\ICompressor.cs" />
     <Compile Include="Compressor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -8,7 +8,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using ServerUtils;
-using ServerUtils.Interfaces;
 using SocketChat.Insfrastructure;
 
 namespace SocketChat.ViewModels
@@ -16,9 +15,7 @@ namespace SocketChat.ViewModels
     public class MainVm : NotifyPropertyChangedBase
     {
         #region Fields
-
-        private readonly ICompressor _compressor;
-
+        
         private const ushort LocalPortFrom = 55000;
         private const ushort LocalPortTo = 55999;
 
@@ -34,8 +31,6 @@ namespace SocketChat.ViewModels
 
         public MainVm()
         {
-            _compressor = new Compressor();
-
             ConnectCommand = new RelayCommand(Connect, CanConnect);
             DisconnectCommand = new RelayCommand(Disconnect, CanDisconnect);
             SendCommand = new RelayCommand(Send, CanSend);
@@ -212,7 +207,7 @@ namespace SocketChat.ViewModels
 
         private async Task SendMesage(string message)
         {
-            var compressedBytes = await _compressor.CompressAsync(message.ToBytes());
+            var compressedBytes = await Compressor.CompressAsync(message.ToBytes());
             await compressedBytes.Encrypt(_cryptoKey).SendToStream(_stream);
         }
 
