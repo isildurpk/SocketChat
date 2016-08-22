@@ -1,29 +1,15 @@
-﻿using ServerUtils.Interfaces;
-
-namespace ServerUtils
+﻿namespace ServerUtils
 {
-    public class Cryptographer : ICryptographer
+    public static class Cryptographer
     {
-        #region Constructors
-
-        public Cryptographer()
-        {
-        }
-
-        #endregion
-
-        #region Implementation of ICryptographer
-
-        public byte[] Encrypt(byte[] data)
+        public static byte[] Encrypt(byte[] data, byte[] keyBlob)
         {
             return null;
         }
 
-        public byte[] Decrypt(byte[] data)
+        public static byte[] Decrypt(byte[] data, byte[] keyBlob)
         {
             return null;
         }
-
-        #endregion
     }
 }
