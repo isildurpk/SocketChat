@@ -15,7 +15,7 @@ namespace SocketChat.ViewModels
     public class MainVm : NotifyPropertyChangedBase
     {
         #region Fields
-        
+
         private const ushort LocalPortFrom = 55000;
         private const ushort LocalPortTo = 55999;
 
@@ -80,17 +80,18 @@ namespace SocketChat.ViewModels
                     await ac.PublicKeyBlob.SendToStream(_stream);
                     _cryptoKey = ac.Decrypt(await GetMessageBytesAsync());
                 }
-
+                
                 await SendMesage(Nickname);
-
-                IsConnected = true;
-                OnPropertyChanged(nameof(IsConnected));
-
-                ThreadPool.QueueUserWorkItem(state => ReceiveMessages());
             }
             catch (ObjectDisposedException)
             {
+                return;
             }
+
+            IsConnected = true;
+            OnPropertyChanged(nameof(IsConnected));
+
+            ThreadPool.QueueUserWorkItem(state => ReceiveMessages());
         }
 
         private bool CanConnect()
@@ -166,14 +167,20 @@ namespace SocketChat.ViewModels
 
         private async void ReceiveMessages()
         {
-            while (IsConnected)
+            try
             {
-                var message = await GetMessageBytesAsync();
-                message = await message.Decrypt(_cryptoKey).DecompressAsync();
+                while (IsConnected)
+                {
+                    var message = await GetMessageBytesAsync();
+                    message = await message.Decrypt(_cryptoKey).DecompressAsync();
 
-                _outputSb.AppendLine($"{DateTime.Now:t} {Encoding.UTF8.GetString(message)}");
-                Output = _outputSb.ToString();
-                OnPropertyChanged(nameof(Output));
+                    _outputSb.AppendLine($"{DateTime.Now:t} {Encoding.UTF8.GetString(message)}");
+                    Output = _outputSb.ToString();
+                    OnPropertyChanged(nameof(Output));
+                }
+            }
+            catch (ObjectDisposedException)
+            {
             }
         }
 
