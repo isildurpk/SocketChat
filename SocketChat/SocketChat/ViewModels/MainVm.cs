@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -46,59 +47,65 @@ namespace SocketChat.ViewModels
         [SuppressMessage("ReSharper", "PossibleInvalidOperationException")]
         private async void Connect()
         {
+            if (IsConnecting)
+                return;
+
             IsConnecting = true;
             InfoMessage = string.Empty;
 
             try
             {
-                var random = new Random();
-                var port = random.Next(LocalPortFrom, LocalPortTo);
-                var localIep = new IPEndPoint(IPAddress.Any, port);
-                _tcpClient = new TcpClient(localIep);
-            }
-            catch (SocketException e)
-            {
-                InfoMessage = e.Message;
-                IsConnecting = false;
-                return;
-            }
-
-            var tcpClient = _tcpClient;
-            try
-            {
-                var serverIp = IPAddress.Parse(ServerIp);
-                await tcpClient.ConnectAsync(serverIp, ServerPort.Value);
-                _stream = _tcpClient.GetStream();
-            }
-            catch (SocketException)
-            {
-                InfoMessage = $"Can`t connect to the server {ServerIp}:{ServerPort}";
-                tcpClient.Close();
-                IsConnecting = false;
-                return;
-            }
-
-            try
-            {
-                using (var ac = new AssymmetricCryptographer())
+                try
                 {
-                    await ac.PublicKeyBlob.SendToStream(_stream);
-                    _cryptoKey = ac.Decrypt(await GetMessageBytesAsync());
+                    var random = new Random();
+                    var port = random.Next(LocalPortFrom, LocalPortTo);
+                    var localIep = new IPEndPoint(IPAddress.Any, port);
+                    _tcpClient = new TcpClient(localIep);
+                }
+                catch (SocketException e)
+                {
+                    InfoMessage = e.Message;
+                    return;
+                }
+
+                var tcpClient = _tcpClient;
+                try
+                {
+                    var serverIp = IPAddress.Parse(ServerIp);
+                    await tcpClient.ConnectAsync(serverIp, ServerPort.Value);
+                    _stream = _tcpClient.GetStream();
+                }
+                catch (SocketException)
+                {
+                    InfoMessage = $"Can`t connect to the server {ServerIp}:{ServerPort}";
+                    tcpClient.Close();
+                    return;
+                }
+
+                try
+                {
+                    using (var ac = new AssymmetricCryptographer())
+                    {
+                        await ac.PublicKeyBlob.SendToStream(_stream);
+                        _cryptoKey = ac.Decrypt(await GetMessageBytesAsync());
+                    }
+
+                    await SendMesage(Nickname);
+                }
+                catch (ObjectDisposedException)
+                {
+                    return;
                 }
                 
-                await SendMesage(Nickname);
+                IsConnected = true;
+                OnPropertyChanged(nameof(IsConnected));
+
+                ThreadPool.QueueUserWorkItem(state => ReceiveMessages());
             }
-            catch (ObjectDisposedException)
+            finally
             {
                 IsConnecting = false;
-                return;
             }
-
-            IsConnecting = false;
-            IsConnected = true;
-            OnPropertyChanged(nameof(IsConnected));
-
-            ThreadPool.QueueUserWorkItem(state => ReceiveMessages());
         }
 
         private bool CanConnect()
@@ -199,7 +206,11 @@ namespace SocketChat.ViewModels
                     OnPropertyChanged(nameof(Output));
                 }
             }
-            catch (ObjectDisposedException)
+            catch (IOException) // Server lost
+            {
+                Disconnect();
+            }
+            catch (ObjectDisposedException) // Client disconnected
             {
             }
         }
@@ -214,7 +225,6 @@ namespace SocketChat.ViewModels
                 for (int i = 0; i < count; i++)
                     messageContainer.Add(buffer[i]);
             } while (_stream.DataAvailable);
-
             return messageContainer.ToArray();
         }
 
