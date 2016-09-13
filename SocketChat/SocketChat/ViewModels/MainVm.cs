@@ -24,6 +24,7 @@ namespace SocketChat.ViewModels
         private NetworkStream _stream;
         private string _infoMessage;
         private byte[] _cryptoKey;
+        private bool _isConnecting;
 
         #endregion
 
@@ -45,6 +46,7 @@ namespace SocketChat.ViewModels
         [SuppressMessage("ReSharper", "PossibleInvalidOperationException")]
         private async void Connect()
         {
+            IsConnecting = true;
             InfoMessage = string.Empty;
 
             try
@@ -57,19 +59,22 @@ namespace SocketChat.ViewModels
             catch (SocketException e)
             {
                 InfoMessage = e.Message;
+                IsConnecting = false;
                 return;
             }
 
+            var tcpClient = _tcpClient;
             try
             {
                 var serverIp = IPAddress.Parse(ServerIp);
-                await _tcpClient.ConnectAsync(serverIp, ServerPort.Value);
+                await tcpClient.ConnectAsync(serverIp, ServerPort.Value);
                 _stream = _tcpClient.GetStream();
             }
             catch (SocketException)
             {
                 InfoMessage = $"Can`t connect to the server {ServerIp}:{ServerPort}";
-                _tcpClient.Close();
+                tcpClient.Close();
+                IsConnecting = false;
                 return;
             }
 
@@ -85,9 +90,11 @@ namespace SocketChat.ViewModels
             }
             catch (ObjectDisposedException)
             {
+                IsConnecting = false;
                 return;
             }
 
+            IsConnecting = false;
             IsConnected = true;
             OnPropertyChanged(nameof(IsConnected));
 
@@ -137,7 +144,20 @@ namespace SocketChat.ViewModels
 
         #region Properties
 
-        public bool IsConnected { get; set; }
+        public bool IsConnected { get; private set; }
+
+        public bool IsConnecting
+        {
+            get { return _isConnecting; }
+            private set
+            {
+                if (_isConnecting == value)
+                    return;
+
+                _isConnecting = value;
+                OnPropertyChanged();
+            }
+        }
 
         public string Input { get; set; }
 
