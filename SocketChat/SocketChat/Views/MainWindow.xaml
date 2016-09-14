@@ -72,7 +72,7 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <TextBox Grid.Column="0"
+            <TextBox Grid.Column="0" VerticalContentAlignment="Center"
                      Text="{Binding Input, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             <Button Grid.Column="1" Content="Send" Padding="8 3" Margin="3"
                     Command="{Binding SendCommand}" IsDefault="True" />
