@@ -35,6 +35,8 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
@@ -61,6 +63,9 @@
             <Button Grid.Row="3" Grid.Column="1" Content="Disconnect" Margin="3" Width="80" HorizontalAlignment="Right"
                     Visibility="{Binding IsConnected, Converter={StaticResource BooleanToVisibilityConverter}}"
                     Command="{Binding DisconnectCommand}" />
+
+            <Button Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Content="Show network info" Margin="3"
+                    Command="{Binding ShowNetworkInfoCommand}" />
         </Grid>
 
         <TextBox Grid.Row="0" Grid.Column="1" IsReadOnly="True" Padding="8"

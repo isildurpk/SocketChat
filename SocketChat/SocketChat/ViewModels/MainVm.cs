@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -36,6 +37,7 @@ namespace SocketChat.ViewModels
             ConnectCommand = new RelayCommand(Connect, CanConnect);
             DisconnectCommand = new RelayCommand(Disconnect, CanDisconnect);
             SendCommand = new RelayCommand(Send, CanSend);
+            ShowNetworkInfoCommand = new RelayCommand(ShowNetworkInfo);
         }
 
         #endregion
@@ -145,6 +147,14 @@ namespace SocketChat.ViewModels
         private bool CanSend()
         {
             return !string.IsNullOrEmpty(Input) && IsConnected;
+        }
+
+        public ICommand ShowNetworkInfoCommand { get; private set; }
+
+        public void ShowNetworkInfo()
+        {
+            var interfaces = NetworkInterface.GetAllNetworkInterfaces();
+
         }
 
         #endregion
