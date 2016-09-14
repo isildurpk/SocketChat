@@ -8,6 +8,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using ServerUtils;
 using SocketChat.Insfrastructure;
@@ -151,10 +152,25 @@ namespace SocketChat.ViewModels
 
         public ICommand ShowNetworkInfoCommand { get; private set; }
 
-        public void ShowNetworkInfo()
+        private void ShowNetworkInfo()
         {
+            var sb = new StringBuilder();
+            
             var interfaces = NetworkInterface.GetAllNetworkInterfaces();
+            foreach (var @int in interfaces)
+            {
+                sb.AppendLine($"Id: {@int.Id}");
+                sb.AppendLine($"Name: {@int.Name}");
+                sb.AppendLine($"Description: {@int.Description}");
+                sb.AppendLine($"Type: {@int.NetworkInterfaceType}");
+                sb.AppendLine($"IsReceivedOnly: {@int.IsReceiveOnly}");
+                sb.AppendLine($"OperationalStatus: {@int.OperationalStatus}");
+                sb.AppendLine($"Speed: {@int.Speed}");
+                sb.AppendLine($"Supports multicast: {@int.SupportsMulticast}");
+                sb.AppendLine();
+            }
 
+            MessageBox.Show(sb.ToString(), "Network information");
         }
 
         #endregion
