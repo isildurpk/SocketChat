@@ -12,6 +12,7 @@ using System.Windows;
 using System.Windows.Input;
 using ServerUtils;
 using SocketChat.Insfrastructure;
+using SocketChat.Views;
 
 namespace SocketChat.ViewModels
 {
@@ -170,7 +171,9 @@ namespace SocketChat.ViewModels
                 sb.AppendLine();
             }
 
-            MessageBox.Show(sb.ToString(), "Network information");
+            var textViewer = new TextViewerWindow();
+            ((TextViewerVm) textViewer.DataContext).Initialize(sb.ToString());
+            textViewer.ShowDialog();
         }
 
         #endregion
